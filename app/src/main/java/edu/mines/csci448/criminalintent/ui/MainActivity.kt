@@ -1,5 +1,5 @@
 package edu.mines.csci448.criminalintent.ui
-
+import edu.mines.csci448.criminalintent.ui.detail.CrimeDetailFragment
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -19,7 +19,17 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // TODO 2 create fragment transaction
+        val currentFragment = supportFragmentManager.findFragmentById(binding.fragmentContainer.id)
+        if(currentFragment == null ) {
+            val fragment = CrimeDetailFragment()
+            supportFragmentManager
+                .beginTransaction()
+                .add(binding.fragmentContainer.id, fragment)
+                .commit()
+        }
+
+
+
     }
 
     override fun onStart() {
@@ -46,4 +56,5 @@ class MainActivity : AppCompatActivity() {
         Log.d(LOG_TAG, "onDestroy() called")
         super.onDestroy()
     }
+
 }
