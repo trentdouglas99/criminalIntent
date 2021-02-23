@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import edu.mines.csci448.criminalintent.data.Crime
+import android.widget.Toast
 import edu.mines.csci448.criminalintent.databinding.ActivityMainBinding
 import edu.mines.csci448.criminalintent.databinding.FragmentDetailBinding
 import edu.mines.csci448.criminalintent.databinding.FragmentListBinding
@@ -19,7 +20,6 @@ import edu.mines.csci448.criminalintent.ui.detail.CrimeDetailFragment
 
 
 class CrimeListFragment : Fragment() {
-
     companion object {
         private const val LOG_TAG = "448.CrimeListFrag"
     }
@@ -41,13 +41,25 @@ class CrimeListFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var crimeListViewModel: CrimeListViewModel
 
+    private lateinit var adapter: CrimeListAdapter
 
+    private fun updateUI() {
+        val crimes = crimeListViewModel.crimes
+        adapter = CrimeListAdapter(crimes) { crime: Crime -> Unit; Toast.makeText(context, "${crime.title} pressed!", Toast.LENGTH_SHORT).show() }
+
+
+
+        binding.crimeListRecyclerView.adapter = adapter
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?{
         Log.d(LOG_TAG, "onCreateView() called")
         _binding = FragmentListBinding.inflate(inflater, container, false)
 
         binding.crimeListRecyclerView.layoutManager = LinearLayoutManager(context)
+
+        updateUI()
+
         return binding.root
 
     }
