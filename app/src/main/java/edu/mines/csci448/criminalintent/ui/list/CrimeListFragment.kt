@@ -2,8 +2,6 @@ package edu.mines.csci448.criminalintent.ui.list
 
 import android.content.Context
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -13,10 +11,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import edu.mines.csci448.criminalintent.data.Crime
 import android.widget.Toast
-import edu.mines.csci448.criminalintent.databinding.ActivityMainBinding
-import edu.mines.csci448.criminalintent.databinding.FragmentDetailBinding
+import androidx.lifecycle.Observer
 import edu.mines.csci448.criminalintent.databinding.FragmentListBinding
-import edu.mines.csci448.criminalintent.ui.detail.CrimeDetailFragment
 
 
 class CrimeListFragment : Fragment() {
@@ -32,7 +28,7 @@ class CrimeListFragment : Fragment() {
         Log.d(LOG_TAG, "onCreate() called")
         super.onCreate(savedInstanceState)
 
-        val factory = CrimeListViewModelFactory()
+        val factory = CrimeListViewModelFactory(requireContext())
         crimeListViewModel = ViewModelProvider(this@CrimeListFragment, factory).get(CrimeListViewModel::class.java)
     }
 
@@ -43,12 +39,8 @@ class CrimeListFragment : Fragment() {
 
     private lateinit var adapter: CrimeListAdapter
 
-    private fun updateUI() {
-        val crimes = crimeListViewModel.crimes
+    private fun updateUI(crimes: List<Crime>) {
         adapter = CrimeListAdapter(crimes) { crime: Crime -> Unit; Toast.makeText(context, "${crime.title} pressed!", Toast.LENGTH_SHORT).show() }
-
-
-
         binding.crimeListRecyclerView.adapter = adapter
     }
 
@@ -58,7 +50,7 @@ class CrimeListFragment : Fragment() {
 
         binding.crimeListRecyclerView.layoutManager = LinearLayoutManager(context)
 
-        updateUI()
+        updateUI(emptyList())
 
         return binding.root
 
@@ -66,6 +58,15 @@ class CrimeListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?){
         Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
+        crimeListViewModel.crimeListLiveData.observe(
+            viewLifecycleOwner,
+            Observer { crimes ->
+                crimes?.let{
+                    Log.i(LOG_TAG, "Got crimes ${crimes.size}")
+                    updateUI(crimes)
+                }
+            }
+        )
     }
     override fun onActivityCreated(savedInstanceState: Bundle?){
         Log.d(LOG_TAG, "onActivityCreated() called")
