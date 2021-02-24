@@ -21,14 +21,14 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         //val currentFragment = supportFragmentManager.findFragmentById(binding.fragmentContainer.id)
-        val currentFragment = null
-        if(currentFragment == null ) {
-            val fragment = CrimeListFragment()
-            supportFragmentManager
-                .beginTransaction()
-                .add(binding.fragmentContainer.id, fragment)
-                .commit()
-        }
+//        val currentFragment = null
+//        if(currentFragment == null ) {
+//            val fragment = CrimeListFragment()
+//            supportFragmentManager
+//                .beginTransaction()
+//                .add(binding.fragmentContainer.id, fragment)
+//                .commit()
+//        }
 
 
 

@@ -12,10 +12,16 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.navArgs
 import edu.mines.csci448.criminalintent.data.Crime
 import edu.mines.csci448.criminalintent.databinding.FragmentDetailBinding
+import edu.mines.csci448.criminalintent.ui.list.CrimeDetailViewModelFactory
 
 class CrimeDetailFragment : Fragment() {
+    private val args: CrimeDetailFragmentArgs by navArgs()
+    private lateinit var crimeDetailViewModel: CrimeDetailViewModel
     companion object {
         private const val LOG_TAG = "448.CrimeDetailFrag"
     }
@@ -32,6 +38,12 @@ class CrimeDetailFragment : Fragment() {
         Log.d(LOG_TAG, "onCreate() called")
         crime = Crime()
         super.onCreate(savedInstanceState)
+        val crimeId = args.crimeId
+        Log.d(LOG_TAG, "args bundle crime ID: $crimeId")
+
+        val factory = CrimeDetailViewModelFactory(requireContext())
+        crimeDetailViewModel = ViewModelProvider(this, factory).get(CrimeDetailViewModel::class.java)
+        crimeDetailViewModel.loadCrime(crimeId)
     }
 
     private var _binding: FragmentDetailBinding? = null
@@ -55,6 +67,17 @@ class CrimeDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?){
         Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
+
+        crimeDetailViewModel.crimeLiveData.observe(
+            viewLifecycleOwner, Observer { crime ->
+                crime?.let{
+                    this.crime=crime
+                    updateUI()
+                }
+            })
+
+
+
     }
     override fun onActivityCreated(savedInstanceState: Bundle?){
         Log.d(LOG_TAG, "onActivityCreated() called")
@@ -90,6 +113,8 @@ class CrimeDetailFragment : Fragment() {
     override fun onStop(){
         Log.d(LOG_TAG, "onStop() called")
         super.onStop()
+
+        crimeDetailViewModel.saveCrime(crime)
     }
     override fun onDestroyView(){
         Log.d(LOG_TAG, "onDestroyView() called")
@@ -103,5 +128,15 @@ class CrimeDetailFragment : Fragment() {
     override fun onDetach(){
         Log.d(LOG_TAG, "onDetach() called")
         super.onDetach()
+    }
+
+    private fun updateUI() {
+        binding.crimeTitleEditText.setText( crime.title )
+        binding.crimeDateButton.text = crime.date.toString()
+        //binding.crimeSolvedCheckbox.isChecked = crime.isSolved
+        binding.crimeSolvedCheckbox.apply{
+            isChecked = crime.isSolved
+            jumpDrawablesToCurrentState()
+        }
     }
 }

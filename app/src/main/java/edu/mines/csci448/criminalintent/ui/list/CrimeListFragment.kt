@@ -12,6 +12,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import edu.mines.csci448.criminalintent.data.Crime
 import android.widget.Toast
 import androidx.lifecycle.Observer
+import androidx.navigation.Navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import edu.mines.csci448.criminalintent.databinding.FragmentListBinding
 
 
@@ -40,7 +42,15 @@ class CrimeListFragment : Fragment() {
     private lateinit var adapter: CrimeListAdapter
 
     private fun updateUI(crimes: List<Crime>) {
-        adapter = CrimeListAdapter(crimes) { crime: Crime -> Unit; Toast.makeText(context, "${crime.title} pressed!", Toast.LENGTH_SHORT).show() }
+        adapter = CrimeListAdapter(crimes) {
+                crime: Crime -> Unit
+                val action = CrimeListFragmentDirections.actionCrimeListFragmentToCrimeDetailFragment( crime.id )
+                findNavController().navigate(action)
+        }
+
+
+
+
         binding.crimeListRecyclerView.adapter = adapter
     }
 
