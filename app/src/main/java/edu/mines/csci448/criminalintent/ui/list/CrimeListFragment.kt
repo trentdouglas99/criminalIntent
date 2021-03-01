@@ -3,9 +3,7 @@ package edu.mines.csci448.criminalintent.ui.list
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,6 +12,7 @@ import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.navigation.Navigation.findNavController
 import androidx.navigation.fragment.findNavController
+import edu.mines.csci448.criminalintent.R
 import edu.mines.csci448.criminalintent.databinding.FragmentListBinding
 
 
@@ -29,9 +28,31 @@ class CrimeListFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?){
         Log.d(LOG_TAG, "onCreate() called")
         super.onCreate(savedInstanceState)
-
+        setHasOptionsMenu(true)
         val factory = CrimeListViewModelFactory(requireContext())
         crimeListViewModel = ViewModelProvider(this@CrimeListFragment, factory).get(CrimeListViewModel::class.java)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        Log.d(LOG_TAG, "onOptionsItemSelected() called")
+        return when(item.itemId) {
+            R.id.new_crime_menu_item -> {
+                val crime = Crime()
+                crimeListViewModel.addCrime(crime)
+                val action = CrimeListFragmentDirections
+                        .actionCrimeListFragmentToCrimeDetailFragment(crime.id)
+                findNavController().navigate(action)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        Log.d(LOG_TAG, "onCreateOptionsMenu() called")
+        inflater.inflate(R.menu.fragment_crime_list, menu)
     }
 
     private var _binding: FragmentListBinding? = null

@@ -3,6 +3,10 @@ import edu.mines.csci448.criminalintent.ui.detail.CrimeDetailFragment
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import androidx.navigation.Navigation.findNavController
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.NavigationUI
 import edu.mines.csci448.criminalintent.databinding.ActivityMainBinding
 import edu.mines.csci448.criminalintent.ui.list.CrimeListFragment
 
@@ -20,18 +24,15 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        //val currentFragment = supportFragmentManager.findFragmentById(binding.fragmentContainer.id)
-//        val currentFragment = null
-//        if(currentFragment == null ) {
-//            val fragment = CrimeListFragment()
-//            supportFragmentManager
-//                .beginTransaction()
-//                .add(binding.fragmentContainer.id, fragment)
-//                .commit()
-//        }
+        val navHostFragment = supportFragmentManager.findFragmentById(binding.navHostFragment.id) as NavHostFragment
+        NavigationUI.setupActionBarWithNavController(this, navHostFragment.navController)
 
 
+    }
 
+    override fun onSupportNavigateUp(): Boolean {
+        return findNavController(binding.navHostFragment.id).navigateUp()
+                || super.onSupportNavigateUp()
     }
 
     override fun onStart() {
