@@ -19,7 +19,8 @@ class DatePickerFragment  : DialogFragment(), DatePickerDialog.OnDateSetListener
     }
 
     override fun onDateSet(view: DatePicker?, year: Int, month: Int, dayOfMonth: Int) {
-        val resultDate: Date = GregorianCalendar(year, month, dayOfMonth).time
+        calendar.set(year, month, dayOfMonth)
+        val resultDate: Date = calendar.time
         val result = Bundle().apply {
             putSerializable(RESULT_DATE_KEY, resultDate)
         }
@@ -27,10 +28,13 @@ class DatePickerFragment  : DialogFragment(), DatePickerDialog.OnDateSetListener
         setFragmentResult(resultRequestKey, result)
     }
 
+    lateinit var calendar:Calendar
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val date = arguments?.getSerializable(ARG_DATE) as Date
-        val calendar = Calendar.getInstance()
+        calendar = Calendar.getInstance()
         calendar.time = date
+
         val initialYear = calendar.get(Calendar.YEAR)
         val initialMonth = calendar.get(Calendar.MONTH)
         val initialDay = calendar.get(Calendar.DAY_OF_MONTH)

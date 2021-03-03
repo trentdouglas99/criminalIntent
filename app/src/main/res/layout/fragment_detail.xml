@@ -35,7 +35,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="20sp"
-        tools:text="Wed Feb 10 14:00 MST 2021"/>
+        tools:text="Wed Feb 10 2021"/>
+    <Button
+        android:id="@+id/crime_time_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        tools:text="14:00 MST"/>
 
     <CheckBox
         android:id="@+id/crime_solved_checkbox"

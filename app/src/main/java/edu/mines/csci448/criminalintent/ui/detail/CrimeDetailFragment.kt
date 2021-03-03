@@ -18,11 +18,16 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
 import edu.mines.csci448.criminalintent.data.Crime
 import edu.mines.csci448.criminalintent.databinding.FragmentDetailBinding
+import edu.mines.csci448.criminalintent.ui.TimePickerFragment
 import edu.mines.csci448.criminalintent.ui.list.CrimeDetailViewModelFactory
+import java.text.DateFormat
+import java.text.DateFormat.getDateInstance
+import java.text.SimpleDateFormat
 import java.util.*
 
 
 private const val REQUEST_DATE = "DialogDate"
+private const val REQUEST_TIME = "DialogTime"
 
 class CrimeDetailFragment : Fragment(), DatePickerFragment.Callbacks, FragmentResultListener {
     private val args: CrimeDetailFragmentArgs by navArgs()
@@ -33,6 +38,7 @@ class CrimeDetailFragment : Fragment(), DatePickerFragment.Callbacks, FragmentRe
     private lateinit var crime: Crime
     private lateinit var titleField: EditText
     private lateinit var dateButton: Button
+    private lateinit var timeButton: Button
     private lateinit var solvedCheckBox: CheckBox
 
     override fun onAttach(context: Context){
@@ -46,6 +52,10 @@ class CrimeDetailFragment : Fragment(), DatePickerFragment.Callbacks, FragmentRe
                 crime.date = DatePickerFragment.getSelectedDate(result) as Date
                 updateUI()
             }
+            REQUEST_TIME -> {
+                crime.date = TimePickerFragment.getSelectedDate(result) as Date
+                updateUI()
+            }
         }
     }
 
@@ -55,9 +65,13 @@ class CrimeDetailFragment : Fragment(), DatePickerFragment.Callbacks, FragmentRe
         updateUI()
     }
 
+    private var calendar : Calendar = Calendar.getInstance()
     override fun onCreate(savedInstanceState: Bundle?){
         Log.d(LOG_TAG, "onCreate() called")
         crime = Crime()
+
+
+
         super.onCreate(savedInstanceState)
         val crimeId = args.crimeId
         Log.d(LOG_TAG, "args bundle crime ID: $crimeId")
@@ -71,12 +85,17 @@ class CrimeDetailFragment : Fragment(), DatePickerFragment.Callbacks, FragmentRe
     // This property is only valid between onCreateView and onDestroyView
     private val binding get() = _binding!!
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?{
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View?{
         Log.d(LOG_TAG, "onCreateView() called")
 
         _binding = FragmentDetailBinding.inflate(inflater, container, false)
         titleField = binding.crimeTitleEditText
         dateButton = binding.crimeDateButton
+        timeButton = binding.crimeTimeButton
         solvedCheckBox = binding.crimeSolvedCheckbox
 //        dateButton.apply{
 //            text = crime.date.toString()
@@ -90,11 +109,12 @@ class CrimeDetailFragment : Fragment(), DatePickerFragment.Callbacks, FragmentRe
         super.onViewCreated(view, savedInstanceState)
 
         childFragmentManager.setFragmentResultListener(REQUEST_DATE, viewLifecycleOwner, this)
+        childFragmentManager.setFragmentResultListener(REQUEST_TIME, viewLifecycleOwner, this)
 
         crimeDetailViewModel.crimeLiveData.observe(
             viewLifecycleOwner, Observer { crime ->
-                crime?.let{
-                    this.crime=crime
+                crime?.let {
+                    this.crime = crime
                     updateUI()
                 }
             })
@@ -111,8 +131,13 @@ class CrimeDetailFragment : Fragment(), DatePickerFragment.Callbacks, FragmentRe
         super.onStart()
 
         val titleWatcher = object : TextWatcher{
-            override fun beforeTextChanged(sequence: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(sequence: CharSequence?, start:Int, before:Int, count:Int){
+            override fun beforeTextChanged(
+                sequence: CharSequence?,
+                start: Int,
+                count: Int,
+                after: Int
+            ) {}
+            override fun onTextChanged(sequence: CharSequence?, start: Int, before: Int, count: Int){
                 crime.title = sequence.toString()
             }
 
@@ -120,11 +145,21 @@ class CrimeDetailFragment : Fragment(), DatePickerFragment.Callbacks, FragmentRe
         }
         titleField.addTextChangedListener(titleWatcher)
         solvedCheckBox.apply{
-            setOnCheckedChangeListener{_, isChecked ->crime.isSolved = isChecked}
+            setOnCheckedChangeListener{ _, isChecked ->crime.isSolved = isChecked}
         }
         dateButton.setOnClickListener{
-            DatePickerFragment.newInstance(crime.date, REQUEST_DATE).show(childFragmentManager, REQUEST_DATE)
+            DatePickerFragment.newInstance(crime.date, REQUEST_DATE).show(
+                childFragmentManager,
+                REQUEST_DATE
+            )
         }
+        timeButton.setOnClickListener{
+            TimePickerFragment.newInstance(crime.date, REQUEST_TIME).show(
+                childFragmentManager,
+                REQUEST_TIME
+            )
+        }
+        calendar.time = crime.date
 
 
     }
@@ -157,8 +192,13 @@ class CrimeDetailFragment : Fragment(), DatePickerFragment.Callbacks, FragmentRe
     }
 
     private fun updateUI() {
-        binding.crimeTitleEditText.setText( crime.title )
-        binding.crimeDateButton.text = crime.date.toString()
+        binding.crimeTitleEditText.setText(crime.title)
+
+        //var dateString: String = crime.date.day.toString() + " " + crime.date.month.toString() + " " + crime.date.year.toString()
+        val df: DateFormat = SimpleDateFormat("MM/dd/yy")
+        val tf: DateFormat = SimpleDateFormat("HH:mm")
+        binding.crimeDateButton.text = df.format(crime.date)
+        binding.crimeTimeButton.text = tf.format(crime.date)
         //binding.crimeSolvedCheckbox.isChecked = crime.isSolved
         binding.crimeSolvedCheckbox.apply{
             isChecked = crime.isSolved
