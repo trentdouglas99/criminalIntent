@@ -12,14 +12,19 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentResultListener
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
 import edu.mines.csci448.criminalintent.data.Crime
 import edu.mines.csci448.criminalintent.databinding.FragmentDetailBinding
 import edu.mines.csci448.criminalintent.ui.list.CrimeDetailViewModelFactory
+import java.util.*
 
-class CrimeDetailFragment : Fragment() {
+
+private const val REQUEST_DATE = "DialogDate"
+
+class CrimeDetailFragment : Fragment(), DatePickerFragment.Callbacks, FragmentResultListener {
     private val args: CrimeDetailFragmentArgs by navArgs()
     private lateinit var crimeDetailViewModel: CrimeDetailViewModel
     companion object {
@@ -34,6 +39,22 @@ class CrimeDetailFragment : Fragment() {
         Log.d(LOG_TAG, "onAttach() called")
         super.onAttach(context)
     }
+
+    override fun onFragmentResult(requestKey: String, result: Bundle) {
+        when(requestKey) {
+            REQUEST_DATE -> {
+                crime.date = DatePickerFragment.getSelectedDate(result) as Date
+                updateUI()
+            }
+        }
+    }
+
+
+    override fun onDateSelected(date: Date) {
+        crime.date = date
+        updateUI()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?){
         Log.d(LOG_TAG, "onCreate() called")
         crime = Crime()
@@ -57,16 +78,18 @@ class CrimeDetailFragment : Fragment() {
         titleField = binding.crimeTitleEditText
         dateButton = binding.crimeDateButton
         solvedCheckBox = binding.crimeSolvedCheckbox
-        dateButton.apply{
-            text = crime.date.toString()
-            isEnabled = false
-        }
+//        dateButton.apply{
+//            text = crime.date.toString()
+//            isEnabled = false
+//        }
         return binding.root
 
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?){
         Log.d(LOG_TAG, "onViewCreated() called")
         super.onViewCreated(view, savedInstanceState)
+
+        childFragmentManager.setFragmentResultListener(REQUEST_DATE, viewLifecycleOwner, this)
 
         crimeDetailViewModel.crimeLiveData.observe(
             viewLifecycleOwner, Observer { crime ->
@@ -98,6 +121,9 @@ class CrimeDetailFragment : Fragment() {
         titleField.addTextChangedListener(titleWatcher)
         solvedCheckBox.apply{
             setOnCheckedChangeListener{_, isChecked ->crime.isSolved = isChecked}
+        }
+        dateButton.setOnClickListener{
+            DatePickerFragment.newInstance(crime.date, REQUEST_DATE).show(childFragmentManager, REQUEST_DATE)
         }
 
 
