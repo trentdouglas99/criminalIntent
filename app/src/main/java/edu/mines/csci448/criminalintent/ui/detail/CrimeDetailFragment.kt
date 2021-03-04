@@ -34,6 +34,16 @@ class CrimeDetailFragment : Fragment(), DatePickerFragment.Callbacks, FragmentRe
     private lateinit var crimeDetailViewModel: CrimeDetailViewModel
     companion object {
         private const val LOG_TAG = "448.CrimeDetailFrag"
+        private const val ARG_CRIME_ID = "crimeId"
+        fun createFragment(crimeId: UUID): CrimeDetailFragment {
+            val args = Bundle().apply {
+                putSerializable(ARG_CRIME_ID, crimeId)
+            }
+            return CrimeDetailFragment().apply {
+                arguments = args
+            }
+        }
+
     }
     private lateinit var crime: Crime
     private lateinit var titleField: EditText

@@ -1,6 +1,7 @@
 package edu.mines.csci448.criminalintent.ui.list
 
 import android.content.Context
+import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -14,9 +15,22 @@ import androidx.navigation.Navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import edu.mines.csci448.criminalintent.R
 import edu.mines.csci448.criminalintent.databinding.FragmentListBinding
+import java.util.*
 
 
 class CrimeListFragment : Fragment() {
+
+    private var _callbacks: Callbacks? = null
+    // only accessible between onAttach & onDetach
+    private val callbacks get() = _callbacks!!
+
+
+    interface Callbacks {
+        fun getOrientation(): Int
+        fun onCrimeSelected(crimeId: UUID)
+    }
+
+
     companion object {
         private const val LOG_TAG = "448.CrimeListFrag"
     }
@@ -24,6 +38,12 @@ class CrimeListFragment : Fragment() {
     override fun onAttach(context: Context){
         Log.d(LOG_TAG, "onAttach() called")
         super.onAttach(context)
+        try {
+            _callbacks = (context as Callbacks)
+        } catch (e: ClassCastException) {
+            throw ClassCastException("$context must implement CrimeListFragment.Callbacks")
+        }
+
     }
     override fun onCreate(savedInstanceState: Bundle?){
         Log.d(LOG_TAG, "onCreate() called")
@@ -63,15 +83,17 @@ class CrimeListFragment : Fragment() {
     private lateinit var adapter: CrimeListAdapter
 
     private fun updateUI(crimes: List<Crime>) {
-        adapter = CrimeListAdapter(crimes) {
-                crime: Crime -> Unit
-                val action = CrimeListFragmentDirections.actionCrimeListFragmentToCrimeDetailFragment( crime.id )
+        adapter = CrimeListAdapter(crimes) { crime: Crime ->
+            if(callbacks.getOrientation() == ORIENTATION_PORTRAIT) {
+                // we are in one pane mode with a NavController
+                val action = CrimeListFragmentDirections.actionCrimeListFragmentToCrimeDetailFragment(crime.id)
                 findNavController().navigate(action)
+            } else {
+                // we are in two pane mode, we don’t know what else
+                // exists..Host, handle for us!
+                callbacks.onCrimeSelected(crime.id)
+            }
         }
-
-
-
-
         binding.crimeListRecyclerView.adapter = adapter
     }
 
@@ -132,6 +154,7 @@ class CrimeListFragment : Fragment() {
     override fun onDetach(){
         Log.d(LOG_TAG, "onDetach() called")
         super.onDetach()
+        _callbacks = null
     }
 
 

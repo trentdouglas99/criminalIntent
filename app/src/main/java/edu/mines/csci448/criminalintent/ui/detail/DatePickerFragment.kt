@@ -10,7 +10,6 @@ import java.io.Serializable
 import java.util.*
 
 
-private const val ARG_DATE = "date"
 private const val RESULT_DATE_KEY = "resultDate"
 class DatePickerFragment  : DialogFragment(), DatePickerDialog.OnDateSetListener {
 

@@ -6,6 +6,12 @@ import edu.mines.csci448.criminalintent.data.repo.CrimeRepository
 import edu.mines.csci448.criminalintent.ui.MainActivity
 
 class CriminalIntentApplication: Application() {
+
+
+    val initialOrientation by lazy {
+        resources.configuration.orientation
+    }
+
     companion object {
         private const val LOG_TAG = "448.criminalIntentApplication"
     }
