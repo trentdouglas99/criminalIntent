@@ -1,9 +1,11 @@
 package edu.mines.csci448.criminalintent.ui.detail
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.text.format.DateFormat.format
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -16,12 +18,12 @@ import androidx.fragment.app.FragmentResultListener
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
+import edu.mines.csci448.criminalintent.R
 import edu.mines.csci448.criminalintent.data.Crime
 import edu.mines.csci448.criminalintent.databinding.FragmentDetailBinding
 import edu.mines.csci448.criminalintent.ui.TimePickerFragment
 import edu.mines.csci448.criminalintent.ui.list.CrimeDetailViewModelFactory
 import java.text.DateFormat
-import java.text.DateFormat.getDateInstance
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -45,11 +47,26 @@ class CrimeDetailFragment : Fragment(), DatePickerFragment.Callbacks, FragmentRe
         }
 
     }
+
+    private fun generateCrimeReport(): String {
+        val dateString = format("EEE, MMM dd", crime.date)
+        val solvedString = if(crime.isSolved) { getString(R.string.crime_report_solved)
+        } else {
+            getString(R.string.crime_report_unsolved)
+        }
+        val suspectString = if(crime.suspect == null) { getString(R.string.crime_report_no_suspect)
+        } else {
+            getString(R.string.crime_report_suspect, crime.suspect)
+        }
+        return getString(R.string.crime_report, crime.title, dateString, solvedString, suspectString)
+    }
+
     private lateinit var crime: Crime
     private lateinit var titleField: EditText
     private lateinit var dateButton: Button
     private lateinit var timeButton: Button
     private lateinit var solvedCheckBox: CheckBox
+    private lateinit var reportButton:Button
 
     override fun onAttach(context: Context){
         Log.d(LOG_TAG, "onAttach() called")
@@ -107,6 +124,7 @@ class CrimeDetailFragment : Fragment(), DatePickerFragment.Callbacks, FragmentRe
         dateButton = binding.crimeDateButton
         timeButton = binding.crimeTimeButton
         solvedCheckBox = binding.crimeSolvedCheckbox
+        reportButton = binding.crimeReportButton
 //        dateButton.apply{
 //            text = crime.date.toString()
 //            isEnabled = false
@@ -169,6 +187,18 @@ class CrimeDetailFragment : Fragment(), DatePickerFragment.Callbacks, FragmentRe
                 REQUEST_TIME
             )
         }
+        reportButton.setOnClickListener {
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, generateCrimeReport())
+                putExtra(Intent.EXTRA_SUBJECT,
+                        getString(R.string.crime_report_subject))
+            }
+            startActivity(intent)
+        }
+
+
+
         calendar.time = crime.date
 
 
