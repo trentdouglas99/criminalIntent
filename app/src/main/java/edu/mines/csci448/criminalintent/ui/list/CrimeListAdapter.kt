@@ -6,7 +6,6 @@ import androidx.recyclerview.widget.RecyclerView
 import edu.mines.csci448.criminalintent.data.Crime
 import edu.mines.csci448.criminalintent.databinding.ListItemCrimeBinding
 
-// CrimeListAdapter.kt
 class CrimeListAdapter(private val crimes: List<Crime>, private val clickListener: (Crime) -> Unit ) : RecyclerView.Adapter<CrimeHolder>() {
 
     override fun getItemCount(): Int{
